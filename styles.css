@@ -1,0 +1,37 @@
+:root { color-scheme: light; --ink: #12263a; --teal: #087e78; --muted: #667481; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fafbfc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.site-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1180px; margin: auto; padding: 24px 28px; border-bottom: 1px solid #e3e9ed; }
+.brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font-size: 23px; font-weight: 750; }
+.brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; font-weight: 400; }
+.spec-link { color: var(--teal); font-size: 14px; font-weight: 600; text-decoration: none; }
+main { max-width: 1180px; margin: auto; padding: 0 28px; }
+.intro { padding: 36px 0 16px; }
+.eyebrow { color: var(--teal); font-size: 11px; font-weight: 700; letter-spacing: 1.7px; }
+h1 { margin: 12px 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: -1.2px; }
+.intro > p { margin: 0 0 24px; color: var(--muted); line-height: 1.6; }
+.demo-note { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 14px 18px; color: #245852; background: #eaf6f3; border: 1px solid #d5e9e4; border-radius: 10px; font-size: 13px; line-height: 1.6; }
+.loading-message, .load-error { padding: 24px 0; line-height: 1.6; }
+.load-error a { color: var(--teal); }
+footer { padding: 24px; color: var(--muted); text-align: center; font-size: 12px; }
+.swagger-ui .wrapper { padding: 0; }
+.swagger-ui .info { margin: 24px 0; }
+.swagger-ui .info .title { color: var(--ink); font-size: 26px; }
+.swagger-ui .info .description p { color: var(--muted); line-height: 1.6; }
+.swagger-ui .scheme-container { margin: 20px 0 28px; padding: 16px; border: 1px solid #e3e9ed; border-radius: 10px; box-shadow: none; background: #fff; }
+.swagger-ui .btn.authorize { border-color: var(--teal); color: var(--teal); }
+.swagger-ui .btn.authorize svg { fill: var(--teal); }
+.swagger-ui .opblock { border-radius: 8px; box-shadow: none; }
+.swagger-ui .opblock .opblock-summary { padding: 8px; }
+.swagger-ui .opblock .opblock-summary-path { font-size: 15px; }
+.swagger-ui .opblock .opblock-summary-description { font-size: 13px; }
+.swagger-ui .opblock-tag { font-size: 22px; }
+.swagger-ui section.models { background: #fff; border-color: #e3e9ed; border-radius: 10px; }
+@media (max-width: 640px) {
+  .site-header { padding: 20px 16px; gap: 12px; }
+  .brand { font-size: 20px; }
+  .spec-link { font-size: 12px; }
+  main { padding: 0 16px; }
+  .swagger-ui .opblock .opblock-summary { flex-wrap: wrap; gap: 8px; }
+  .swagger-ui .opblock .opblock-summary-description { flex-basis: 100%; }
+}

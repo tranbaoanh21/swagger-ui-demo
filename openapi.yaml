@@ -1,0 +1,415 @@
+openapi: 3.1.0
+info:
+  title: Multition User API
+  version: 0.1.0-demo
+  description: |
+    Contract demo cho 5 endpoint quản lý hồ sơ học sinh, sinh viên.
+    Tất cả request/response bên dưới là dữ liệu minh họa; backend hiện chưa triển khai các route này.
+
+    Các thao tác sửa và xóa yêu cầu Bearer JWT của chính chủ hồ sơ.
+    Hồ sơ công khai không trả về email hoặc mật khẩu.
+  license:
+    name: Private course project
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: http://localhost:4000/api/v1
+    description: API dự kiến — chưa có user endpoints. Thay URL này sau khi deploy backend.
+tags:
+  - name: Users
+    description: Tạo tài khoản, tìm hồ sơ và quản lý hồ sơ cá nhân.
+paths:
+  /users:
+    post:
+      tags: [Users]
+      operationId: createUser
+      summary: Tạo tài khoản người dùng
+      description: |
+        Đăng ký tài khoản học sinh/sinh viên. Email phải duy nhất.
+        Backend sẽ hash mật khẩu, không lưu hoặc trả về mật khẩu dạng rõ.
+        Endpoint này không cấp JWT; đăng nhập nằm ngoài phạm vi demo.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+            example:
+              displayName: Nguyễn Minh Anh
+              email: minhanh@example.com
+              password: DemoOnly!2026
+              school: Đại học Bách khoa TP.HCM
+      responses:
+        '201':
+          description: Tạo tài khoản thành công.
+          headers:
+            Location:
+              description: Đường dẫn đến hồ sơ vừa tạo.
+              schema:
+                type: string
+                example: /api/v1/users/349ba1be-33e2-4f0c-b54d-d1ea081ec59d
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                id: 349ba1be-33e2-4f0c-b54d-d1ea081ec59d
+                displayName: Nguyễn Minh Anh
+                school: Đại học Bách khoa TP.HCM
+                bio: ''
+                skills: []
+                availability: flexible
+                githubUrl: null
+                portfolioUrl: null
+                createdAt: '2026-11-03T08:00:00Z'
+                updatedAt: '2026-11-03T08:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email đã được đăng ký.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: EMAIL_ALREADY_EXISTS
+                message: Email này đã được sử dụng.
+    get:
+      tags: [Users]
+      operationId: listUsers
+      summary: Tìm danh sách người dùng
+      description: Tìm hồ sơ công khai theo kỹ năng, có phân trang. Không trả email, mật khẩu hoặc CV riêng tư.
+      security: []
+      parameters:
+        - name: skill
+          in: query
+          description: Lọc theo một kỹ năng; so khớp không phân biệt hoa/thường.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+            example: Figma
+        - name: page
+          in: query
+          description: Trang kết quả, bắt đầu từ 1.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Số hồ sơ mỗi trang.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Danh sách hồ sơ phù hợp. Không có kết quả trả data rỗng và total bằng 0.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+              example:
+                data:
+                  - id: 349ba1be-33e2-4f0c-b54d-d1ea081ec59d
+                    displayName: Nguyễn Minh Anh
+                    school: Đại học Bách khoa TP.HCM
+                    bio: Tìm đội thi thiết kế sản phẩm, có thể tham gia 6–8 giờ/tuần.
+                    skills: [Figma, UI/UX]
+                    availability: evenings
+                    githubUrl: null
+                    portfolioUrl: https://example.com/minhanh
+                    createdAt: '2026-11-03T08:00:00Z'
+                    updatedAt: '2026-11-03T09:00:00Z'
+                pagination:
+                  page: 1
+                  limit: 10
+                  total: 1
+                  totalPages: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /users/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      tags: [Users]
+      operationId: getUserById
+      summary: Xem chi tiết hồ sơ
+      description: Xem hồ sơ công khai, kỹ năng, thời gian rảnh và các liên kết năng lực của một thành viên.
+      security: []
+      responses:
+        '200':
+          description: Thông tin hồ sơ công khai.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Users]
+      operationId: updateUser
+      summary: Cập nhật hồ sơ cá nhân
+      description: |
+        Chỉ chủ hồ sơ được cập nhật. Chỉ gửi các field muốn thay đổi.
+        skills thay thế toàn bộ danh sách cũ; mảng rỗng xóa các kỹ năng.
+        Gửi null cho githubUrl hoặc portfolioUrl để xóa liên kết.
+        Không cho đổi email/mật khẩu qua endpoint hồ sơ này.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+            example:
+              bio: Tìm đồng đội thi hackathon, phụ trách UI/UX.
+              skills: [Figma, UI/UX, User research]
+              availability: weekends
+              portfolioUrl: https://example.com/minhanh
+      responses:
+        '200':
+          description: Hồ sơ sau cập nhật.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Users]
+      operationId: deleteUser
+      summary: Xóa tài khoản của chính mình
+      description: |
+        Yêu cầu JWT của chính chủ. Sau khi xóa thành công, hồ sơ không còn xuất hiện
+        trong danh sách và GET hồ sơ trả 404. Không trả body khi thành công.
+        Chính sách lưu giữ dữ liệu và liên kết đội/chat sẽ được chốt khi triển khai nghiệp vụ.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Tài khoản đã được xóa. Response không có nội dung.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT từ hệ thống đăng nhập trong tương lai. Demo tài liệu chưa cấp/kiểm tra token.
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: ID duy nhất của người dùng, theo định dạng UUID.
+      schema:
+        type: string
+        format: uuid
+        example: 349ba1be-33e2-4f0c-b54d-d1ea081ec59d
+  schemas:
+    User:
+      type: object
+      description: Hồ sơ công khai; không chứa thông tin đăng nhập hoặc tài liệu riêng tư.
+      required: [id, displayName, school, bio, skills, availability, githubUrl, portfolioUrl, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          example: 349ba1be-33e2-4f0c-b54d-d1ea081ec59d
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        school:
+          $ref: '#/components/schemas/School'
+        bio:
+          $ref: '#/components/schemas/Bio'
+        skills:
+          $ref: '#/components/schemas/Skills'
+        availability:
+          $ref: '#/components/schemas/Availability'
+        githubUrl:
+          $ref: '#/components/schemas/ProfileLink'
+        portfolioUrl:
+          $ref: '#/components/schemas/ProfileLink'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: '2026-11-03T08:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: '2026-11-03T09:00:00Z'
+    CreateUser:
+      type: object
+      additionalProperties: false
+      required: [displayName, email, password, school]
+      properties:
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          writeOnly: true
+          example: minhanh@example.com
+        password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+          description: Mật khẩu ví dụ dành cho demo; không sử dụng tài khoản thật.
+          example: DemoOnly!2026
+        school:
+          $ref: '#/components/schemas/School'
+    UpdateUser:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        displayName:
+          $ref: '#/components/schemas/DisplayName'
+        school:
+          $ref: '#/components/schemas/School'
+        bio:
+          $ref: '#/components/schemas/Bio'
+        skills:
+          $ref: '#/components/schemas/Skills'
+        availability:
+          $ref: '#/components/schemas/Availability'
+        githubUrl:
+          $ref: '#/components/schemas/ProfileLink'
+        portfolioUrl:
+          $ref: '#/components/schemas/ProfileLink'
+    DisplayName:
+      type: string
+      minLength: 2
+      maxLength: 80
+      example: Nguyễn Minh Anh
+    School:
+      type: string
+      minLength: 2
+      maxLength: 160
+      example: Đại học Bách khoa TP.HCM
+    Bio:
+      type: string
+      maxLength: 280
+      example: Tìm đội thi thiết kế sản phẩm, có thể tham gia 6–8 giờ/tuần.
+    Skills:
+      type: array
+      maxItems: 10
+      uniqueItems: true
+      items:
+        type: string
+        minLength: 1
+        maxLength: 50
+      example: [Figma, UI/UX]
+    Availability:
+      type: string
+      description: 'Thời gian có thể tham gia: linh hoạt, buổi tối hoặc cuối tuần.'
+      enum: [flexible, evenings, weekends]
+      example: evenings
+    ProfileLink:
+      type: [string, 'null']
+      format: uri
+      pattern: '^https://'
+      maxLength: 2048
+      description: Liên kết công khai dùng HTTPS, hoặc null khi chưa cung cấp.
+      example: https://example.com/minhanh
+    Pagination:
+      type: object
+      required: [page, limit, total, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 10
+        total:
+          type: integer
+          minimum: 0
+          example: 1
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 1
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Dữ liệu đầu vào không hợp lệ.
+  responses:
+    BadRequest:
+      description: Query, UUID hoặc request body không hợp lệ.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VALIDATION_ERROR
+            message: Dữ liệu đầu vào không hợp lệ.
+    Unauthorized:
+      description: Thiếu JWT hoặc token không hợp lệ/hết hạn.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: Vui lòng đăng nhập để tiếp tục.
+    Forbidden:
+      description: Người đang đăng nhập không phải chủ hồ sơ.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: FORBIDDEN
+            message: Bạn chỉ được thay đổi tài khoản của chính mình.
+    NotFound:
+      description: Không tồn tại hồ sơ tương ứng, hoặc tài khoản đã bị xóa.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: USER_NOT_FOUND
+            message: Không tìm thấy người dùng.
