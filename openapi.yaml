@@ -1,19 +1,10 @@
 openapi: 3.1.0
 info:
   title: Multition User API
-  version: 0.1.0-demo
-  description: |
-    Contract demo cho 5 endpoint quản lý hồ sơ học sinh, sinh viên.
-    Tất cả request/response bên dưới là dữ liệu minh họa; backend hiện chưa triển khai các route này.
-
-    Các thao tác sửa và xóa yêu cầu Bearer JWT của chính chủ hồ sơ.
-    Hồ sơ công khai không trả về email hoặc mật khẩu.
-  license:
-    name: Private course project
-    identifier: LicenseRef-Proprietary
+  version: 0.1.0
 servers:
   - url: http://localhost:4000/api/v1
-    description: API dự kiến — chưa có user endpoints. Thay URL này sau khi deploy backend.
+    description: User API
 tags:
   - name: Users
     description: Tạo tài khoản, tìm hồ sơ và quản lý hồ sơ cá nhân.
@@ -25,8 +16,7 @@ paths:
       summary: Tạo tài khoản người dùng
       description: |
         Đăng ký tài khoản học sinh/sinh viên. Email phải duy nhất.
-        Backend sẽ hash mật khẩu, không lưu hoặc trả về mật khẩu dạng rõ.
-        Endpoint này không cấp JWT; đăng nhập nằm ngoài phạm vi demo.
+        Mật khẩu được băm, không lưu hoặc trả về dưới dạng rõ.
       security: []
       requestBody:
         required: true
@@ -202,7 +192,6 @@ paths:
       description: |
         Yêu cầu JWT của chính chủ. Sau khi xóa thành công, hồ sơ không còn xuất hiện
         trong danh sách và GET hồ sơ trả 404. Không trả body khi thành công.
-        Chính sách lưu giữ dữ liệu và liên kết đội/chat sẽ được chốt khi triển khai nghiệp vụ.
       security:
         - bearerAuth: []
       responses:
@@ -222,7 +211,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT từ hệ thống đăng nhập trong tương lai. Demo tài liệu chưa cấp/kiểm tra token.
+      description: Bearer JWT của người dùng đã đăng nhập.
   parameters:
     UserId:
       name: userId
@@ -287,7 +276,6 @@ components:
           minLength: 12
           maxLength: 128
           writeOnly: true
-          description: Mật khẩu ví dụ dành cho demo; không sử dụng tài khoản thật.
           example: DemoOnly!2026
         school:
           $ref: '#/components/schemas/School'

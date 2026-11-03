@@ -6,11 +6,6 @@ body { margin: 0; color: var(--ink); background: #fafbfc; font-family: -apple-sy
 .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; font-weight: 400; }
 .spec-link { color: var(--teal); font-size: 14px; font-weight: 600; text-decoration: none; }
 main { max-width: 1180px; margin: auto; padding: 0 28px; }
-.intro { padding: 36px 0 16px; }
-.eyebrow { color: var(--teal); font-size: 11px; font-weight: 700; letter-spacing: 1.7px; }
-h1 { margin: 12px 0; font-size: clamp(27px, 4vw, 40px); letter-spacing: -1.2px; }
-.intro > p { margin: 0 0 24px; color: var(--muted); line-height: 1.6; }
-.demo-note { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 14px 18px; color: #245852; background: #eaf6f3; border: 1px solid #d5e9e4; border-radius: 10px; font-size: 13px; line-height: 1.6; }
 .loading-message, .load-error { padding: 24px 0; line-height: 1.6; }
 .load-error a { color: var(--teal); }
 footer { padding: 24px; color: var(--muted); text-align: center; font-size: 12px; }
