@@ -13,6 +13,7 @@ multition-swagger-demo/
 ├── swagger-initializer.js     # Cấu hình Swagger UI
 ├── styles.css                 # Theme Multition
 ├── logo.svg                   # Logo nhóm
+├── render.yaml                # Render Blueprint cho static site
 └── README.md                  # Hướng dẫn này, không bắt buộc upload
 ```
 
@@ -31,6 +32,30 @@ Sau đó gắn custom domain trong hosting. Không cần cấu hình URL backend
 
 Các asset nội bộ dùng đường dẫn tương đối. Swagger UI JS/CSS tải từ CDN unpkg,
 pin phiên bản `5.34.1`; trình duyệt cần Internet.
+
+## Deploy trên Render
+
+Khi repo chỉ chứa nội dung thư mục demo này, chọn **New → Static Site**, kết nối repo:
+
+| Setting | Giá trị |
+| --- | --- |
+| Root Directory | Để trống |
+| Build Command | `true` (không cần build) |
+| Publish Directory | `.` |
+
+Nếu chọn **New → Blueprint**, đặt **Blueprint Path** là `render.yaml`.
+Commit/push file cấu hình lên repo trước khi Render có thể đọc nó.
+
+**Không dùng `openapi.yaml` làm Blueprint Path.** File đó là tài liệu API để
+Swagger UI tải khi mở trang, không phải cấu hình hạ tầng của Render. Lỗi như
+`field components not found in type file.Spec` thường xuất hiện khi chọn nhầm hai file này.
+
+File `render.yaml` đi kèm giả định demo là repo riêng, với `index.html` ở gốc repo.
+Nếu repo chứa toàn bộ workspace, dùng Static Site với Root Directory là
+`multition-swagger-demo`, Publish Directory là `.`; hoặc thêm
+`rootDir: multition-swagger-demo` vào service trong Blueprint.
+
+Tham khảo: [Render Blueprint specification](https://render.com/docs/blueprint-spec).
 
 ## 5 endpoint minh họa
 
